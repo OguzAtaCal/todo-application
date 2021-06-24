@@ -3,6 +3,7 @@ const knexFile = require("./database/knexfile.js");
 const db = knex(knexFile.development);
 const { attachPaginate } = require("knex-paginate");
 const bcrypt = require("bcrypt");
+const { default: fastify } = require("fastify");
 
 attachPaginate();
 
@@ -28,13 +29,12 @@ class UserServices {
 				.catch((error) => {
 					if (error.code === "23505") {
 						reply.send("error_duplicate_username");
-					} else reply.send(error);
+					} else {
+						console.log("an error has been caught creating a user");
+						reply.send(error);
+					}
 				});
 		});
-
-		//console.log("an error has been caught creating a user");
-		//console.log(err);
-		//return err;
 	}
 
 	async getUsers(request, reply) {
@@ -52,7 +52,7 @@ class UserServices {
 
 	async getUser(request, reply) {
 		try {
-			const user = db("users").where("username", request.params.username);
+			const user = await db("users").where("username", request.params.username);
 			if (user[0]) return user;
 			else return "User couldnt be found";
 		} catch (err) {
@@ -86,6 +86,24 @@ class UserServices {
 		} catch (err) {
 			console.log("an error has been caught updating user");
 			return err;
+		}
+	}
+
+	async createAccessToken(fastify, request, reply) {
+		try {
+			const { username, password } = request.body;
+			//TODO schema validation
+			const user = await db("users").where("username", request.body.username);
+			if (user[0]) {
+				const token = fastify.jwt.sign({ username, password });
+				return token;
+			} else {
+				return "username_not_found";
+			}
+		} catch (error) {
+			console.log("an error has been caught creating access token");
+			reply.send(error);
+			return error;
 		}
 	}
 }
