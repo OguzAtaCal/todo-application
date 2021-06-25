@@ -3,14 +3,12 @@ const knexFile = require("./database/knexfile.js");
 const db = knex(knexFile.development);
 const { attachPaginate } = require("knex-paginate");
 const bcrypt = require("bcrypt");
-const { default: fastify } = require("fastify");
 
 attachPaginate();
 
 class UserServices {
 	async createUser(request, reply) {
 		const { name, email, username, password, city, gender } = request.body;
-		var dbError = true;
 		bcrypt.hash(password, 10, async function (err, hash) {
 			db("users")
 				.insert({
@@ -24,11 +22,11 @@ class UserServices {
 				.then((result) => {
 					reply.status(201);
 					console.log("user added: ", name);
-					return "User added";
+					reply.send("User added");
 				})
 				.catch((error) => {
 					if (error.code === "23505") {
-						reply.send("error_duplicate_username");
+						reply.send(new Error("duplicate_user_error"));
 					} else {
 						console.log("an error has been caught creating a user");
 						reply.send(error);
@@ -89,20 +87,23 @@ class UserServices {
 		}
 	}
 
-	async createAccessToken(fastify, request, reply) {
+	async login(fastify, request, reply) {
 		try {
 			const { username, password } = request.body;
-			//TODO schema validation
 			const user = await db("users").where("username", request.body.username);
-			if (user[0]) {
+
+			// checking if the query found a user
+			if (!user[0]) return new Error("username_not_found_error");
+
+			// checking if the password matches
+			const equal = await bcrypt.compare(password, user[0].password);
+			if (!equal) reply.send(new Error("incorrect_password_error"));
+			else {
 				const token = fastify.jwt.sign({ username, password });
 				return token;
-			} else {
-				return "username_not_found";
 			}
 		} catch (error) {
 			console.log("an error has been caught creating access token");
-			reply.send(error);
 			return error;
 		}
 	}

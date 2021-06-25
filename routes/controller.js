@@ -4,7 +4,7 @@ const postOptions = {
 	schema: {
 		body: {
 			type: "object",
-			required: ["username", "password"],
+			required: ["username", "password", "name", "email", "city", "gender"],
 			properties: {
 				name: { type: "string" },
 				email: { type: "string" },
@@ -12,6 +12,19 @@ const postOptions = {
 				password: { type: "string" },
 				city: { type: "string" },
 				gender: { type: "string" },
+			},
+		},
+	},
+};
+
+const authOptions = {
+	schema: {
+		body: {
+			type: "object",
+			required: ["username", "password"],
+			properties: {
+				username: { type: "string" },
+				password: { type: "string" },
 			},
 		},
 	},
@@ -53,7 +66,7 @@ module.exports = async function callBack(fastify, opts) {
 	});
 
 	// create authentication token
-	fastify.post("/accessToken", async (request, reply) => {
-		return services.createAccessToken(fastify, request, reply);
+	fastify.post("/login", authOptions, async (request, reply) => {
+		return services.login(fastify, request, reply);
 	});
 };
