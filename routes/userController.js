@@ -1,4 +1,4 @@
-const services = require("../services");
+const services = require("../services/userServices");
 
 const postOptions = {
 	schema: {
@@ -32,18 +32,9 @@ const authOptions = {
 
 module.exports = async function callBack(fastify, opts) {
 	// get request
-	const options = {
-		preValidation: [fastify.jwt_authentication],
-	};
-	fastify.get(
-		"/users",
-		{
-			preValidation: [fastify.jwt_authentication],
-		},
-		async (request, reply) => {
-			return services.getUsers(request, reply);
-		}
-	);
+	fastify.get("/users", async (request, reply) => {
+		return services.getUsers(request, reply);
+	});
 
 	// post request
 	fastify.post("/users", postOptions, async (request, reply) => {

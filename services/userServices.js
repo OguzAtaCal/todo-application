@@ -1,5 +1,5 @@
 const knex = require("knex");
-const knexFile = require("./database/knexfile.js");
+const knexFile = require("../database/knexfile.js");
 const db = knex(knexFile.development);
 const { attachPaginate } = require("knex-paginate");
 const bcrypt = require("bcrypt");
@@ -39,8 +39,7 @@ class UserServices {
 		try {
 			const knexQuery = db("users");
 			const { limit, pageOffset } = request.query;
-			if (limit && pageOffset)
-				knexQuery.paginate({ perPage: limit, currentPage: pageOffset });
+			if (limit && pageOffset) knexQuery.paginate({ perPage: limit, currentPage: pageOffset });
 			return knexQuery;
 		} catch (err) {
 			console.log("an error has been caught getting all users");
@@ -93,11 +92,11 @@ class UserServices {
 			const user = await db("users").where("username", request.body.username);
 
 			// checking if the query found a user
-			if (!user[0]) return new Error("username_not_found_error");
+			if (!user[0]) return new Error("incorrect_user_information_error");
 
 			// checking if the password matches
 			const equal = await bcrypt.compare(password, user[0].password);
-			if (!equal) reply.send(new Error("incorrect_password_error"));
+			if (!equal) reply.send(new Error("incorrect_user_information_error"));
 			else {
 				const token = fastify.jwt.sign({ username, password });
 				return token;
