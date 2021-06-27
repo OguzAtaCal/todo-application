@@ -25,10 +25,7 @@
 									ref="username"
 									v-model="username"
 									:value="usernameTaken"
-									:rules="[
-										() => !!username || 'This field is required',
-										() => !!usernameTaken || 'This username was taken',
-									]"
+									:rules="[() => !!username || 'This field is required', () => !!usernameTaken || 'This username was taken']"
 									label="Username"
 									required
 								></v-text-field>
@@ -66,13 +63,7 @@
 								<v-slide-x-reverse-transition>
 									<v-tooltip v-if="formHasErrors" left>
 										<template v-slot:activator="{ on, attrs }">
-											<v-btn
-												icon
-												class="my-0"
-												v-bind="attrs"
-												@click="resetForm"
-												v-on="on"
-											>
+											<v-btn icon class="my-0" v-bind="attrs" @click="resetForm" v-on="on">
 												<v-icon>mdi-refresh</v-icon>
 											</v-btn>
 										</template>
@@ -158,23 +149,19 @@ export default {
 				url: "http://localhost:3030/users",
 			})
 				.then((res) => console.log(res.data[0]))
-				.catch((err) =>
-					console.log("error caught getting users", err.response)
-				),
+				.catch((err) => console.log("error caught getting users", err.response)),
 				axios({
 					method: "POST",
 					url: "http://localhost:3030/users",
 					data: this.form,
 				})
 					.then((res) => {
-						if (res.data && res.data === "error_duplicate_username")
-							console.log("Duplicate user error");
+						if (res.data && res.data === "error_duplicate_username") console.log("Duplicate user error");
 						else console.log(res.data);
 					})
 					.catch((err) => {
 						console.log("error caught creating user", err.response);
-						if (err.response.data.message === "duplicate_user_error")
-							console.log("username taken");
+						if (err.response.data.message === "duplicate_user_error") console.log("username taken");
 					});
 		},
 		async exists() {
@@ -182,9 +169,6 @@ export default {
 				method: "GET",
 				url: "http://localhost:3030/users/" + this.username,
 			});
-			console.log(result);
-			console.log(result.data);
-			console.log(result.data === "User couldnt be found");
 			if (result.data === "User couldnt be found") {
 				this.usernameTaken = true;
 				return false;
