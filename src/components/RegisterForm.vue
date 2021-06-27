@@ -35,6 +35,9 @@
 									:rules="[() => !!password || 'This field is required']"
 									label="Password"
 									required
+									:append-icon="hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
+									@click:append="() => (hidePassword = !hidePassword)"
+									:type="hidePassword ? 'password' : 'text'"
 								></v-text-field>
 								<v-text-field
 									ref="city"
@@ -98,6 +101,7 @@ export default {
 		formHasErrors: false,
 		drawer: null,
 		usernameTaken: true,
+		hidePassword: true,
 	}),
 
 	computed: {

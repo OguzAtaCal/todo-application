@@ -10,7 +10,7 @@
 								v-model="username"
 								:rules="[
 									() => !!username || 'This field is required',
-									() => !!userInformationCorrect || 'Incorrect username and/or password',
+									() => !!userInformationCorrect || 'Incorrect username or password',
 								]"
 								label="Username"
 								required
@@ -20,10 +20,13 @@
 								v-model="password"
 								:rules="[
 									() => !!password || 'This field is required',
-									() => !!userInformationCorrect || 'Incorrect username and/or password',
+									() => !!userInformationCorrect || 'Incorrect username or password',
 								]"
 								label="Password"
 								required
+								:append-icon="hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
+								@click:append="() => (hidePassword = !hidePassword)"
+								:type="hidePassword ? 'password' : 'text'"
 							></v-text-field>
 						</v-card-text>
 						<v-divider class="mt-12"></v-divider>
@@ -65,6 +68,7 @@ export default {
 		formHasErrors: false,
 		loginAllowed: false,
 		userInformationCorrect: true,
+		hidePassword: true,
 	}),
 
 	computed: {
