@@ -1,63 +1,29 @@
 <template>
-  <v-app id="inspire">
-    <v-navigation-drawer
-      v-model="drawer"
-      absolute
-      temporary
-      app
-    >
-      <v-list
-        nav
-        dense
-      >
-        <v-list-item-group
-          active-class="deep-purple--text text--accent-4"
-        >
-          <v-list-item :to="`/`"  >
-            <v-list-item-icon>
-              <v-icon>mdi-home</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Home</v-list-item-title>
-          </v-list-item>
+	<v-app id="inspire">
+		<NavigationDrawer :drawer="drawer" app />
 
-          <v-list-item :to="`/login`">
-            <v-list-item-icon>
-              <v-icon>mdi-login</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Login</v-list-item-title>
-          </v-list-item>
+		<v-app-bar app>
+			<v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-        <v-list-item :to="`/register`"  >
-            <v-list-item-icon>
-              <v-icon>mdi-account-plus</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Register</v-list-item-title>
-          </v-list-item>
+			<v-toolbar-title>Home</v-toolbar-title>
+		</v-app-bar>
 
-        </v-list-item-group>
-      </v-list>
-    </v-navigation-drawer>
-
-    <v-app-bar app>
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-
-      <v-toolbar-title>Application</v-toolbar-title>
-    </v-app-bar>
-
-    <v-main>
-      <Home />
-    </v-main>
-  </v-app>
+		<v-main>
+			<Home />
+		</v-main>
+	</v-app>
 </template>
 
 <script>
-  import Home from '@/components/HomePage'
+import Home from "@/components/HomePage";
+import NavigationDrawer from "@/components/NavigationDrawer";
 
-  export default {
-    data: () => ({ drawer: null }),
+export default {
+	data: () => ({ drawer: null }),
 
-    components: {
-      Home
-    }
-  }
+	components: {
+		Home,
+		NavigationDrawer,
+	},
+};
 </script>

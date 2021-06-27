@@ -1,66 +1,31 @@
 <template>
-  <v-app id="inspire">
-    <v-navigation-drawer
-      v-model="drawer"
-      absolute
-      temporary
-    >
-      <v-list
-        nav
-        dense
-      >
-        <v-list-item-group
-          active-class="deep-purple--text text--accent-4"
-        >
-          <v-list-item :to="`/`"  >
-            <v-list-item-icon>
-              <v-icon>mdi-home</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Home</v-list-item-title>
-          </v-list-item>
+	<v-app id="inspire">
+		<NavigationDrawer :drawer="drawer" app />
 
-          <v-list-item :to="`/login`">
-            <v-list-item-icon>
-              <v-icon>mdi-login</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Login</v-list-item-title>
-          </v-list-item>
-          
-        <v-list-item :to="`/register`"  >
-            <v-list-item-icon>
-              <v-icon>mdi-account-plus</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Register</v-list-item-title>
-          </v-list-item>
+		<v-app-bar app>
+			<v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
-        </v-list-item-group>
-      </v-list>
-    </v-navigation-drawer>
+			<v-toolbar-title>Registration</v-toolbar-title>
+		</v-app-bar>
 
-    <v-app-bar app>
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-
-      <v-toolbar-title>Application</v-toolbar-title>
-    </v-app-bar>
-
-    <v-main>
-          <RegisterForm />
-    </v-main>
-  </v-app>
+		<v-main>
+			<RegisterForm />
+		</v-main>
+	</v-app>
 </template>
 
-
-
 <script>
-import RegisterForm from '@/components/RegisterForm'
+import RegisterForm from "@/components/RegisterForm";
+import NavigationDrawer from "@/components/NavigationDrawer";
 
-  export default {
-    data: () => ({
-      drawer: null}), 
-      
-    components: {
-      RegisterForm
-    }
-  }
-  
+export default {
+	data: () => ({
+		drawer: null,
+	}),
+
+	components: {
+		RegisterForm,
+		NavigationDrawer,
+	},
+};
 </script>
