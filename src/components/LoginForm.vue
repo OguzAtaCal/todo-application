@@ -112,10 +112,8 @@ export default {
 						password: this.password,
 					},
 				});
-				this.$refs.username.validate();
-				this.$refs.password.validate();
-				console.log(result);
-				this.storeToken(result.data);
+				this.validateForms();
+				this.$store.dispatch("storeToken", result);
 			} catch (error) {
 				if (error.response.data.message === "incorrect_user_information_error") {
 					this.userInformationCorrect = false;
@@ -135,11 +133,6 @@ export default {
 		validateForms() {
 			this.$refs.username.validate();
 			this.$refs.password.validate();
-		},
-
-		storeToken(token) {
-			localStorage.username = this.username;
-			localStorage.jwt = token;
 		},
 	},
 };

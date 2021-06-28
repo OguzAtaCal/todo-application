@@ -1,15 +1,32 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from "vue";
+import Vuex from "vuex";
+import VuexPersistence from "vuex-persist";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
+
+const vuexLocal = new VuexPersistence({
+	storage: window.localStorage,
+});
 
 export default new Vuex.Store({
-  state: {
-  },
-  mutations: {
-  },
-  actions: {
-  },
-  modules: {
-  }
-})
+	state: {
+		jwt: "",
+	},
+	mutations: {
+		storeToken(state, jwt) {
+			state.jwt = jwt;
+		},
+		resetToken(state) {
+			state.jwt = "";
+		},
+	},
+	actions: {
+		storeToken(context, jwt) {
+			context.commit("storeToken", jwt);
+		},
+		resetToken(context) {
+			context.commit("resetToken");
+		},
+	},
+	plugins: [vuexLocal.plugin],
+});

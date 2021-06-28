@@ -4,6 +4,7 @@ import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
 import Todo from "../views/Todo.vue";
+import store from "../store/index.js";
 
 Vue.use(VueRouter);
 
@@ -38,11 +39,12 @@ const router = new VueRouter({
 	base: process.env.BASE_URL,
 	routes,
 });
-
 router.beforeEach((to, from, next) => {
 	try {
-		if (to.meta.requiresAuth === true && !localStorage.jwt) {
+		if (to.meta.requiresAuth === true && !store.state.jwt) {
 			next({ name: "Login" });
+		} else if ((to.name === "Login" || to.name === "Register") && store.state.jwt) {
+			next({ name: "Home" });
 		} else next();
 	} catch (error) {
 		console.log(error);

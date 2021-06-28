@@ -14,6 +14,20 @@
 					</v-list-item>
 				</v-list>
 
+				<v-list-item v-if="!isLoggedIn" :to="'/login'">
+					<v-list-item-icon>
+						<v-icon>mdi-login</v-icon>
+					</v-list-item-icon>
+					<v-list-item-title>Login</v-list-item-title>
+				</v-list-item>
+
+				<v-list-item v-if="!isLoggedIn" :to="'/register'">
+					<v-list-item-icon>
+						<v-icon>mdi-account-plus</v-icon>
+					</v-list-item-icon>
+					<v-list-item-title>Register</v-list-item-title>
+				</v-list-item>
+
 				<v-list-item v-if="isLoggedIn" @click="logout">
 					<v-list-item-icon>
 						<v-icon>mdi-logout</v-icon>
@@ -32,17 +46,13 @@ export default {
 	data() {
 		return {
 			drawerOpen: false,
-			items: [
-				{ title: "Home", link: "/", icon: "mdi-home" },
-				{ title: "Login", link: "/login", icon: "mdi-login" },
-				{ title: "Register", link: "/register", icon: "mdi-account-plus" },
-			],
+			items: [{ title: "Home", link: "/", icon: "mdi-home" }],
 		};
 	},
 
 	computed: {
 		isLoggedIn: function() {
-			return localStorage.jwt;
+			return this.$store.state.jwt;
 		},
 	},
 
@@ -54,7 +64,7 @@ export default {
 
 	methods: {
 		logout() {
-			localStorage.jwt = "";
+			this.$store.dispatch("resetToken");
 		},
 	},
 };
