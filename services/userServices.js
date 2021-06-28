@@ -61,7 +61,7 @@ class UserServices {
 	async updateUser(request, reply) {
 		try {
 			const { name, email, username, password, city, gender } = request.body;
-			db("users").where("username", request.params.username).update({
+			await db("users").where("username", request.params.username).update({
 				name: name,
 				email: email,
 				username: username,
@@ -78,7 +78,7 @@ class UserServices {
 
 	async deleteUser(request, reply) {
 		try {
-			db("users").where("username", request.params.username).del();
+			await db("users").where("username", request.params.username).del();
 			return "User: " + request.params.username + " deleted";
 		} catch (err) {
 			console.log("an error has been caught updating user");
@@ -96,9 +96,10 @@ class UserServices {
 
 			// checking if the password matches
 			const equal = await bcrypt.compare(password, user[0].password);
+			const userId = user[0].id;
 			if (!equal) reply.send(new Error("incorrect_user_information_error"));
 			else {
-				const token = fastify.jwt.sign({ username, password });
+				const token = fastify.jwt.sign({ userId });
 				return token;
 			}
 		} catch (error) {

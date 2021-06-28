@@ -31,14 +31,19 @@ const authOptions = {
 };
 
 module.exports = async function callBack(fastify, opts) {
+	const options = {
+		preValidation: [fastify.jwt_authentication],
+	};
 	// get request
 	fastify.get("/users", async (request, reply) => {
+		console.log(request.headers.authorization);
 		return services.getUsers(request, reply);
 	});
 
 	// post request
 	fastify.post("/users", postOptions, async (request, reply) => {
-		services.createUser(request, reply);
+		console.log(request.headers.authorization);
+		return services.createUser(request, reply);
 	});
 
 	// get specific user
