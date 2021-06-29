@@ -3,7 +3,8 @@ require("dotenv").config();
 const fastify = require("fastify");
 const app = fastify();
 const usersRoute = require("./routes/userController.js");
-const todoRoute = require("./routes/todoController.js");
+const todoListRoute = require("./routes/todoListController.js");
+const todoRoute = require("./routes/todoController");
 
 app.get("/", (request, reply) => {
 	return "Hello World";
@@ -19,6 +20,7 @@ app.register(require("./middleware/auth"));
 
 // registering endpoints
 app.register(usersRoute);
+app.register(todoListRoute);
 app.register(todoRoute);
 
 // registering cors to allow access from other ports

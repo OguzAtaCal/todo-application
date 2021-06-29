@@ -31,9 +31,6 @@ const authOptions = {
 };
 
 module.exports = async function callBack(fastify, opts) {
-	const options = {
-		preValidation: [fastify.jwt_authentication],
-	};
 	// get request
 	fastify.get("/users", async (request, reply) => {
 		console.log(request.headers.authorization);
