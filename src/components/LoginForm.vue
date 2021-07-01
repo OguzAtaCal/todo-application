@@ -13,6 +13,7 @@
 									() => !!userInformationCorrect || 'Incorrect username or password',
 								]"
 								label="Username"
+								@keydown.enter.prevent="submit"
 								required
 							></v-text-field>
 							<v-text-field
@@ -26,6 +27,7 @@
 								required
 								:append-icon="hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
 								@click:append="() => (hidePassword = !hidePassword)"
+								@keydown.enter.prevent="submit"
 								:type="hidePassword ? 'password' : 'text'"
 							></v-text-field>
 						</v-card-text>
@@ -35,16 +37,6 @@
 								Register
 							</v-btn>
 							<v-spacer></v-spacer>
-							<v-slide-x-reverse-transition>
-								<v-tooltip v-if="formHasErrors" left>
-									<template v-slot:activator="{ on, attrs }">
-										<v-btn icon class="my-0" v-bind="attrs" @click="resetForm" v-on="on">
-											<v-icon>mdi-refresh</v-icon>
-										</v-btn>
-									</template>
-									<span>Refresh form</span>
-								</v-tooltip>
-							</v-slide-x-reverse-transition>
 							<v-btn color="primary" text @click="submit">
 								Login
 							</v-btn>
@@ -57,8 +49,8 @@
 </template>
 
 <script>
-import axios from "axios";
 const _ = require("lodash");
+import { HTTP } from "../axiosInstance";
 
 export default {
 	data: () => ({
@@ -91,7 +83,6 @@ export default {
 		},
 		submit() {
 			this.formHasErrors = false;
-
 			Object.keys(this.form).forEach((f) => {
 				if (!this.form[f]) this.formHasErrors = true;
 				this.$refs[f].validate(true);
@@ -104,9 +95,9 @@ export default {
 
 		async login() {
 			try {
-				const result = await axios({
+				const result = await HTTP({
 					method: "POST",
-					url: "http://localhost:3030/login",
+					url: "login",
 					data: {
 						username: this.username,
 						password: this.password,
@@ -114,12 +105,14 @@ export default {
 				});
 				this.validateForms();
 				this.$store.dispatch("storeToken", result);
+				this.$router.push("todo");
 			} catch (error) {
-				if (error.response.data.message === "incorrect_user_information_error") {
+				if (error.response && error.response.data && error.response.data.message === "incorrect_user_information_error") {
 					this.userInformationCorrect = false;
 					this.validateForms();
 					this.debouncedRevertValidate();
 				} else {
+					console.log(error);
 					console.log("error caught logging in", error.response);
 				}
 			}

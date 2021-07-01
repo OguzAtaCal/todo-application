@@ -8,7 +8,7 @@
 			<v-toolbar-title>Home</v-toolbar-title>
 		</v-app-bar>
 
-		<v-main>
+		<v-main class="pt-0">
 			<Home />
 		</v-main>
 	</v-app>

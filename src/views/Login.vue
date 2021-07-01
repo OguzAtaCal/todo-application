@@ -8,7 +8,7 @@
 			<v-toolbar-title>Login</v-toolbar-title>
 		</v-app-bar>
 
-		<v-main>
+		<v-main class="pt-0">
 			<LoginForm />
 		</v-main>
 	</v-app>

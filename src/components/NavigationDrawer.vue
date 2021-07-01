@@ -28,6 +28,13 @@
 					<v-list-item-title>Register</v-list-item-title>
 				</v-list-item>
 
+				<v-list-item v-if="isLoggedIn" :to="'/todo'">
+					<v-list-item-icon>
+						<v-icon>mdi-checkbox-marked-outline</v-icon>
+					</v-list-item-icon>
+					<v-list-item-title>Todo</v-list-item-title>
+				</v-list-item>
+
 				<v-list-item v-if="isLoggedIn" @click="logout">
 					<v-list-item-icon>
 						<v-icon>mdi-logout</v-icon>
@@ -65,6 +72,7 @@ export default {
 	methods: {
 		logout() {
 			this.$store.dispatch("resetToken");
+			this.$router.push("/");
 		},
 	},
 };

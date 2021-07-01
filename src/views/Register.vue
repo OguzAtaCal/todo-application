@@ -8,7 +8,7 @@
 			<v-toolbar-title>Registration</v-toolbar-title>
 		</v-app-bar>
 
-		<v-main>
+		<v-main class="pt-0">
 			<RegisterForm />
 		</v-main>
 	</v-app>

@@ -3,7 +3,7 @@ import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
-import Todo from "../views/Todo.vue";
+import TodoList from "../views/TodoList.vue";
 import store from "../store/index.js";
 
 Vue.use(VueRouter);
@@ -26,8 +26,8 @@ const routes = [
 	},
 	{
 		path: "/todo",
-		name: "Todo",
-		component: Todo,
+		name: "TodoList",
+		component: TodoList,
 		meta: {
 			requiresAuth: true,
 		},

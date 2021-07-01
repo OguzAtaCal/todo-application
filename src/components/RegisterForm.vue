@@ -12,6 +12,7 @@
 									:rules="[() => !!name || 'This field is required']"
 									:error-messages="errorMessages"
 									label="Full Name"
+									@keydown.enter.prevent="submit"
 									required
 								></v-text-field>
 								<v-text-field
@@ -19,6 +20,7 @@
 									v-model="email"
 									:rules="[() => !!email || 'This field is required']"
 									label="Email"
+									@keydown.enter.prevent="submit"
 									required
 								></v-text-field>
 								<v-text-field
@@ -27,6 +29,7 @@
 									:value="usernameTaken"
 									:rules="[() => !!username || 'This field is required', () => !!usernameTaken || 'This username was taken']"
 									label="Username"
+									@keydown.enter.prevent="submit"
 									required
 								></v-text-field>
 								<v-text-field
@@ -37,6 +40,7 @@
 									required
 									:append-icon="hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
 									@click:append="() => (hidePassword = !hidePassword)"
+									@keydown.enter.prevent="submit"
 									:type="hidePassword ? 'password' : 'text'"
 								></v-text-field>
 								<v-text-field
@@ -45,6 +49,7 @@
 									:rules="[() => !!city || 'This field is required']"
 									label="City"
 									placeholder="Ankara"
+									@keydown.enter.prevent="submit"
 									required
 								></v-text-field>
 								<v-autocomplete
@@ -63,16 +68,6 @@
 									Cancel
 								</v-btn>
 								<v-spacer></v-spacer>
-								<v-slide-x-reverse-transition>
-									<v-tooltip v-if="formHasErrors" left>
-										<template v-slot:activator="{ on, attrs }">
-											<v-btn icon class="my-0" v-bind="attrs" @click="resetForm" v-on="on">
-												<v-icon>mdi-refresh</v-icon>
-											</v-btn>
-										</template>
-										<span>Refresh form</span>
-									</v-tooltip>
-								</v-slide-x-reverse-transition>
 								<v-btn color="primary" text @click="submit">
 									Submit
 								</v-btn>
@@ -86,7 +81,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import { HTTP } from "../axiosInstance";
 const _ = require("lodash");
 export default {
 	data: () => ({
@@ -147,31 +142,29 @@ export default {
 				this.register();
 			}
 		},
-		register() {
-			axios({
-				method: "GET",
-				url: "http://localhost:3030/users",
+		async register() {
+			HTTP({
+				method: "POST",
+				url: "users",
+				data: this.form,
 			})
-				.then((res) => console.log(res.data[0]))
-				.catch((err) => console.log("error caught getting users", err.response)),
-				axios({
-					method: "POST",
-					url: "http://localhost:3030/users",
-					data: this.form,
+				.then((res) => {
+					if (res.data && res.data === "error_duplicate_username") console.log("Duplicate user error");
+					else {
+						console.log(res.data);
+						this.$router.push("/login");
+					}
 				})
-					.then((res) => {
-						if (res.data && res.data === "error_duplicate_username") console.log("Duplicate user error");
-						else console.log(res.data);
-					})
-					.catch((err) => {
-						console.log("error caught creating user", err.response);
-						if (err.response.data.message === "duplicate_user_error") console.log("username taken");
-					});
+				.catch((err) => {
+					console.log("error caught creating user", err);
+					if (err.response && err.response.data && err.response.data.message === "duplicate_user_error")
+						console.log("username taken");
+				});
 		},
 		async exists() {
-			const result = await axios({
+			const result = await HTTP({
 				method: "GET",
-				url: "http://localhost:3030/users/" + this.username,
+				url: "users/" + this.username,
 			});
 			if (result.data === "User couldnt be found") {
 				this.usernameTaken = true;
