@@ -1,8 +1,8 @@
 <template>
 	<div>
-		<v-list dense rounded :key="componentKey">
-			<div v-for="item in items" :key="item.id" :to="`/todo/${item.id}`">
-				<v-list-item v-if="!item.edit && item.active">
+		<v-list dense rounded>
+			<div v-for="item in items" :key="item.id">
+				<v-list-item v-if="!item.edit && item.active" :to="`/todo-list/${item.id}`">
 					<v-list-item-content>
 						<v-list-item-title v-text="item.name"></v-list-item-title>
 					</v-list-item-content>
@@ -55,7 +55,7 @@
 			<v-text-field
 				v-if="!!items.length"
 				hide-details
-				label="Search for a task"
+				label="Search for a list"
 				outlined
 				append-icon="mdi-magnify"
 				@click:append="searchList"
@@ -88,7 +88,6 @@ export default {
 		newListName: null,
 		editedListName: null,
 		searchName: null,
-		componentKey: 0,
 		items: [],
 	}),
 

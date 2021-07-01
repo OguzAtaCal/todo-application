@@ -28,11 +28,11 @@
 					<v-list-item-title>Register</v-list-item-title>
 				</v-list-item>
 
-				<v-list-item v-if="isLoggedIn" :to="'/todo'">
+				<v-list-item v-if="isLoggedIn" :to="'/todo-list'">
 					<v-list-item-icon>
 						<v-icon>mdi-checkbox-marked-outline</v-icon>
 					</v-list-item-icon>
-					<v-list-item-title>Todo</v-list-item-title>
+					<v-list-item-title>Todo List</v-list-item-title>
 				</v-list-item>
 
 				<v-list-item v-if="isLoggedIn" @click="logout">

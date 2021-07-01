@@ -4,6 +4,7 @@ import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
 import TodoList from "../views/TodoList.vue";
+import TodoPage from "../views/Todos.vue";
 import store from "../store/index.js";
 
 Vue.use(VueRouter);
@@ -25,9 +26,17 @@ const routes = [
 		component: Register,
 	},
 	{
-		path: "/todo",
+		path: "/todo-list",
 		name: "TodoList",
 		component: TodoList,
+		meta: {
+			requiresAuth: true,
+		},
+	},
+	{
+		path: "/todo-list/:id",
+		name: "TodoPage",
+		component: TodoPage,
 		meta: {
 			requiresAuth: true,
 		},

@@ -9,21 +9,21 @@
 		</v-app-bar>
 
 		<v-main class="pt-0">
-			<TodoPage />
+			<TodoListPage />
 		</v-main>
 	</v-app>
 </template>
 
 <script>
 import NavigationDrawer from "@/components/NavigationDrawer";
-import TodoPage from "@/components/TodoList";
+import TodoListPage from "@/components/TodoList";
 
 export default {
 	data: () => ({ drawer: null }),
 
 	components: {
 		NavigationDrawer,
-		TodoPage,
+		TodoListPage,
 	},
 };
 </script>

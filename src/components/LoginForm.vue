@@ -105,7 +105,7 @@ export default {
 				});
 				this.validateForms();
 				this.$store.dispatch("storeToken", result);
-				this.$router.push("todo");
+				this.$router.push("todo-list");
 			} catch (error) {
 				if (error.response && error.response.data && error.response.data.message === "incorrect_user_information_error") {
 					this.userInformationCorrect = false;
