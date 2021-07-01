@@ -7,6 +7,7 @@ class TodoServices {
 	// creating a todo on a specific todo list
 	async createTodo(request, reply, id) {
 		try {
+			console.log(id);
 			const { name } = request.body;
 			const todoList = await db("todo_lists").where("id", request.params.listId);
 			if (todoList[0] && todoList[0].user_id === id) {
@@ -37,7 +38,7 @@ class TodoServices {
 		try {
 			const todoList = await db("todo_lists").where("id", request.params.listId);
 			if (todoList[0] && todoList[0].user_id === id) {
-				const results = await db("todos").where("list_id", request.params.listId);
+				const results = await db("todos").where("list_id", request.params.listId).orderBy("created_at", "asc");
 				reply.send(results);
 			} else reply.send("todo list couldn't be found or wasn't from the correct user");
 		} catch (error) {
@@ -66,11 +67,10 @@ class TodoServices {
 	// updating a todo
 	async updateTodo(request, reply, id) {
 		try {
-			const { name } = request.body;
+			const { name, is_completed } = request.body;
 			const todoList = await db("todo_lists").where("id", request.params.listId);
 			if (todoList[0] && todoList[0].user_id === id) {
 				const todo = await db("todos").where("id", request.params.todoId);
-				const is_completed = todo[0].is_completed;
 
 				if (todo[0] && todo[0].list_id === todoList[0].id) {
 					await db("todos").where("id", request.params.todoId).update({

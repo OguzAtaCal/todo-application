@@ -39,7 +39,7 @@ class TodoListServices {
 	// getting all of the todo lists of a user
 	async getTodoLists(request, reply, id) {
 		try {
-			const results = await db("todo_lists").where("user_id", id);
+			const results = await db("todo_lists").where("user_id", id).orderBy("created_at", "asc");
 			reply.send(results);
 		} catch (error) {
 			console.log("error getting all of the todo lists of user");

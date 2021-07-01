@@ -89,7 +89,8 @@ class UserServices {
 	async login(fastify, request, reply) {
 		try {
 			const { username, password } = request.body;
-			const user = await db("users").where("username", request.body.username);
+			const user = await db("users").where("username", username);
+			console.log("username ", username);
 
 			// checking if the query found a user
 			if (!user[0]) return new Error("incorrect_user_information_error");
@@ -97,6 +98,7 @@ class UserServices {
 			// checking if the password matches
 			const equal = await bcrypt.compare(password, user[0].password);
 			const userId = user[0].id;
+			console.log("userid ", userId);
 			if (!equal) reply.send(new Error("incorrect_user_information_error"));
 			else {
 				const token = fastify.jwt.sign({ userId });
