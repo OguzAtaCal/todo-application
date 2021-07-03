@@ -1,7 +1,7 @@
 <template>
 	<v-list dense rounded>
 		<v-text-field
-			v-if="!!items.length"
+			v-if="hasData"
 			hide-details
 			label="Search for a task"
 			outlined
@@ -77,13 +77,20 @@
 			>
 			</v-text-field>
 		</div>
+
+		<Footer v-on:transferInfo="onTransfer" isTodo="true" />
 	</v-list>
 </template>
 
 <script>
 import { HTTP } from "../axiosInstance";
+import Footer from "@/components/Footer.vue";
 
 export default {
+	components: {
+		Footer,
+	},
+
 	data: () => ({
 		items: [],
 		searchName: null,
@@ -91,6 +98,9 @@ export default {
 		editedTaskName: null,
 		newTaskName: null,
 		listName: "test",
+		currentPage: 1,
+		perPage: 10,
+		hasData: false,
 	}),
 
 	methods: {
@@ -105,6 +115,59 @@ export default {
 					return item;
 				});
 			}
+		},
+
+		async initData() {
+			const results = await HTTP({
+				method: "GET",
+				url: "todos/" + this.$route.params.id + `/items`,
+			});
+			if (results.data[0]) {
+				this.hasData = true;
+			} else this.hasData = false;
+		},
+
+		async initArray() {
+			try {
+				this.items = [];
+				const todoList = await HTTP({
+					method: "GET",
+					url: "todos/" + this.$route.params.id,
+				});
+				if (todoList && todoList.data[0]) {
+					this.listName = todoList.data[0].name;
+					this.emitToParent();
+				}
+
+				await this.initData();
+
+				const results = await HTTP({
+					method: "GET",
+					url: "todos/" + this.$route.params.id + `/items?limit=${this.perPage}&pageOffset=${this.currentPage}`,
+				});
+				console.log(results.data);
+				if (results.data[0]) {
+					for (let counter = 0; counter < results.data.length; counter++) {
+						this.items.push({
+							name: results.data[counter].name,
+							id: results.data[counter].id,
+							listId: results.data[counter].list_id,
+							completed: results.data[counter].is_completed,
+							edit: false,
+							active: true,
+						});
+					}
+				} else this.items = [];
+			} catch (error) {
+				console.log("error fetching todo lists");
+				console.log(error.response);
+			}
+		},
+
+		async onTransfer(currentPage, perPage) {
+			this.currentPage = currentPage;
+			this.perPage = perPage;
+			await this.initArray();
 		},
 
 		async doTask(id) {
@@ -132,6 +195,7 @@ export default {
 				});
 				console.log("deleted ", id);
 				this.items = this.items.filter((item) => item.id !== id);
+				this.initData();
 			} catch (error) {
 				console.log(error);
 			}
@@ -209,38 +273,8 @@ export default {
 		},
 	},
 
-	async created() {
-		try {
-			const todoList = await HTTP({
-				method: "GET",
-				url: "todos/" + this.$route.params.id,
-			});
-			if (todoList && todoList.data[0]) {
-				this.listName = todoList.data[0].name;
-				this.emitToParent();
-			}
-
-			const results = await HTTP({
-				method: "GET",
-				url: "todos/" + this.$route.params.id + "/items",
-			});
-			console.log(results.data);
-			if (results.data[0]) {
-				for (let counter = 0; counter < results.data.length; counter++) {
-					this.items.push({
-						name: results.data[counter].name,
-						id: results.data[counter].id,
-						listId: results.data[counter].list_id,
-						completed: results.data[counter].is_completed,
-						edit: false,
-						active: true,
-					});
-				}
-			} else console.log("error: ", results);
-		} catch (error) {
-			console.log("error fetching todo lists");
-			console.log(error.response);
-		}
+	async mounted() {
+		await this.initArray();
 	},
 
 	watch: {

@@ -77,18 +77,29 @@
 				@keydown.enter.prevent="addList"
 			></v-text-field>
 		</v-list>
+
+		<Footer v-on:transferInfo="onTransfer" isTodo="false" />
 	</div>
 </template>
 
 <script>
 import { HTTP } from "../axiosInstance";
+import Footer from "@/components/Footer.vue";
+
 export default {
+	components: {
+		Footer,
+	},
+
 	data: () => ({
 		editing: false,
 		newListName: null,
 		editedListName: null,
 		searchName: null,
 		items: [],
+		currentPage: 1,
+		perPage: 10,
+		hasData: false,
 	}),
 
 	watch: {
@@ -114,6 +125,51 @@ export default {
 				});
 			}
 		},
+
+		async initData() {
+			const results = await HTTP({
+				method: "GET",
+				url: `todos?limit=${this.perPage}&pageOffset=${this.currentPage}`,
+			});
+			if (results.data[0]) {
+				this.hasData = true;
+			} else this.hasData = false;
+		},
+
+		async initArray() {
+			this.items = [];
+			try {
+				const results = await HTTP({
+					method: "GET",
+					url: `todos?limit=${this.perPage}&pageOffset=${this.currentPage}`,
+				});
+				console.log(results.data);
+				await this.initData();
+				if (results.data[0]) {
+					console.log(results.data);
+					for (let counter = 0; counter < results.data.length; counter++) {
+						this.items.push({
+							name: results.data[counter].name,
+							id: results.data[counter].id,
+							userId: results.data[counter].user_id,
+							taskCount: 0,
+							edit: false,
+							active: true,
+						});
+					}
+				} else console.log(results);
+			} catch (error) {
+				console.log("error fetching todo lists");
+				console.log(error.response);
+			}
+		},
+
+		async onTransfer(currentPage, perPage) {
+			this.currentPage = currentPage;
+			this.perPage = perPage;
+			await this.initArray();
+		},
+
 		async deleteList(id) {
 			try {
 				await HTTP({
@@ -192,29 +248,7 @@ export default {
 	},
 
 	async created() {
-		try {
-			const results = await HTTP({
-				method: "GET",
-				url: "todos",
-			});
-			console.log(results.data);
-			if (results.data[0]) {
-				console.log(results.data);
-				for (let counter = 0; counter < results.data.length; counter++) {
-					this.items.push({
-						name: results.data[counter].name,
-						id: results.data[counter].id,
-						userId: results.data[counter].user_id,
-						taskCount: 0,
-						edit: false,
-						active: true,
-					});
-				}
-			} else console.log("error: ", results);
-		} catch (error) {
-			console.log("error fetching todo lists");
-			console.log(error.response);
-		}
+		await this.initArray();
 	},
 };
 </script>
