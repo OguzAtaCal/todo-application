@@ -4,8 +4,6 @@ const db = knex(knexFile.development);
 const { attachPaginate } = require("knex-paginate");
 const bcrypt = require("bcrypt");
 
-attachPaginate();
-
 class UserServices {
 	async createUser(request, reply) {
 		const { name, email, username, password, city, gender } = request.body;

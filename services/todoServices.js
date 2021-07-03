@@ -5,6 +5,7 @@ const { attachPaginate } = require("knex-paginate");
 
 class TodoServices {
 	// creating a todo on a specific todo list
+
 	async createTodo(request, reply, id) {
 		try {
 			console.log(id);
@@ -35,14 +36,27 @@ class TodoServices {
 
 	// getting the todos from a todo list
 	async getTodos(request, reply, id) {
+		console.log("get");
 		try {
 			const todoList = await db("todo_lists").where("id", request.params.listId);
 			if (todoList[0] && todoList[0].user_id === id) {
-				const results = await db("todos").where("list_id", request.params.listId).orderBy("created_at", "asc");
-				reply.send(results);
+				var results = await db("todos").where("list_id", request.params.listId).orderBy("created_at", "asc");
+				const { limit, pageOffset } = request.query;
+				console.log("limit: ", limit, pageOffset);
+				if (limit && pageOffset) {
+					const results = await db("todos")
+						.where("list_id", request.params.listId)
+						.orderBy("created_at", "asc")
+						.paginate({ perPage: limit, currentPage: pageOffset });
+					reply.send(results.data);
+				} else {
+					const results = await db("todos").where("list_id", request.params.listId).orderBy("created_at", "asc");
+					reply.send(results);
+				}
 			} else reply.send("todo list couldn't be found or wasn't from the correct user");
 		} catch (error) {
 			console.log("error when getting todos");
+			console.log(error);
 			reply.send(error);
 		}
 	}

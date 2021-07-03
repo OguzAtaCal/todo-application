@@ -1,4 +1,6 @@
 require("dotenv").config();
+const { attachPaginate } = require("knex-paginate");
+attachPaginate();
 module.exports = {
 	development: {
 		client: "postgresql",

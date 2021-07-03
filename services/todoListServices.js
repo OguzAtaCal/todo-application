@@ -39,8 +39,17 @@ class TodoListServices {
 	// getting all of the todo lists of a user
 	async getTodoLists(request, reply, id) {
 		try {
-			const results = await db("todo_lists").where("user_id", id).orderBy("created_at", "asc");
-			reply.send(results);
+			const { limit, pageOffset } = request.query;
+			if (limit && pageOffset) {
+				const results = await db("todo_lists")
+					.where("user_id", id)
+					.orderBy("created_at", "asc")
+					.paginate({ perPage: limit, currentPage: pageOffset });
+				reply.send(results.data);
+			} else {
+				const results = await db("todo_lists").where("user_id", id).orderBy("created_at", "asc");
+				reply.send(results);
+			}
 		} catch (error) {
 			console.log("error getting all of the todo lists of user");
 			reply.send(error);
