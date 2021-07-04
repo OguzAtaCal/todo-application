@@ -1,7 +1,6 @@
 const knex = require("knex");
 const knexFile = require("../database/knexfile.js");
 const db = knex(knexFile.development);
-const { attachPaginate } = require("knex-paginate");
 const bcrypt = require("bcrypt");
 
 class UserServices {
@@ -30,6 +29,7 @@ class UserServices {
 						reply.send(error);
 					}
 				});
+			if (err) reply.send(err);
 		});
 	}
 
@@ -38,21 +38,21 @@ class UserServices {
 			const knexQuery = db("users");
 			const { limit, pageOffset } = request.query;
 			if (limit && pageOffset) knexQuery.paginate({ perPage: limit, currentPage: pageOffset });
-			return knexQuery;
+			reply.send(knexQuery);
 		} catch (err) {
 			console.log("an error has been caught getting all users");
-			return err;
+			reply.send(err);
 		}
 	}
 
 	async getUser(request, reply) {
 		try {
 			const user = await db("users").where("username", request.params.username);
-			if (user[0]) return user;
-			else return "User couldnt be found";
+			if (user[0]) reply.send(user);
+			else reply.send("User couldnt be found");
 		} catch (err) {
 			console.log("an error has been caught getting specific user");
-			return err;
+			reply.send(err);
 		}
 	}
 
@@ -67,20 +67,20 @@ class UserServices {
 				city: city,
 				gender: gender,
 			});
-			return "User: " + request.params.username + " updated";
+			reply.send("User: " + request.params.username + " updated");
 		} catch (err) {
 			console.log("an error has been caught updating user");
-			return err;
+			reply.send(err);
 		}
 	}
 
 	async deleteUser(request, reply) {
 		try {
 			await db("users").where("username", request.params.username).del();
-			return "User: " + request.params.username + " deleted";
+			reply.send("User: " + request.params.username + " deleted");
 		} catch (err) {
 			console.log("an error has been caught updating user");
-			return err;
+			reply.send(err);
 		}
 	}
 
@@ -91,7 +91,7 @@ class UserServices {
 			console.log("username ", username);
 
 			// checking if the query found a user
-			if (!user[0]) return new Error("incorrect_user_information_error");
+			if (!user[0]) reply.send(new Error("incorrect_user_information_error"));
 
 			// checking if the password matches
 			const equal = await bcrypt.compare(password, user[0].password);
@@ -100,11 +100,11 @@ class UserServices {
 			if (!equal) reply.send(new Error("incorrect_user_information_error"));
 			else {
 				const token = fastify.jwt.sign({ userId });
-				return token;
+				reply.send(token);
 			}
 		} catch (error) {
 			console.log("an error has been caught creating access token");
-			return error;
+			reply.send(error);
 		}
 	}
 }

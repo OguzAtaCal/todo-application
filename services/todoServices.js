@@ -1,14 +1,12 @@
 const knex = require("knex");
 const knexFile = require("../database/knexfile.js");
 const db = knex(knexFile.development);
-const { attachPaginate } = require("knex-paginate");
 
 class TodoServices {
 	// creating a todo on a specific todo list
 
 	async createTodo(request, reply, id) {
 		try {
-			console.log(id);
 			const { name } = request.body;
 			const todoList = await db("todo_lists").where("id", request.params.listId);
 			if (todoList[0] && todoList[0].user_id === id) {
@@ -36,13 +34,10 @@ class TodoServices {
 
 	// getting the todos from a todo list
 	async getTodos(request, reply, id) {
-		console.log("get");
 		try {
 			const todoList = await db("todo_lists").where("id", request.params.listId);
 			if (todoList[0] && todoList[0].user_id === id) {
-				var results = await db("todos").where("list_id", request.params.listId).orderBy("created_at", "asc");
 				const { limit, pageOffset } = request.query;
-				console.log("limit: ", limit, pageOffset);
 				if (limit && pageOffset) {
 					const results = await db("todos")
 						.where("list_id", request.params.listId)

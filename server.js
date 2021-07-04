@@ -7,7 +7,7 @@ const todoListRoute = require("./routes/todoListController.js");
 const todoRoute = require("./routes/todoController");
 
 app.get("/", (request, reply) => {
-	return "Hello World";
+	reply.send("Hello World");
 });
 
 // register javascript web token

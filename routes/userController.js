@@ -1,4 +1,4 @@
-const services = require("../services/userServices");
+const userServices = require("../services/userServices");
 
 const postOptions = {
 	schema: {
@@ -33,31 +33,31 @@ const authOptions = {
 module.exports = async function callBack(fastify, opts) {
 	// get request
 	fastify.get("/users", async (request, reply) => {
-		return services.getUsers(request, reply);
+		userServices.getUsers(request, reply);
 	});
 
 	// post request
 	fastify.post("/users", postOptions, async (request, reply) => {
-		return services.createUser(request, reply);
+		userServices.createUser(request, reply);
 	});
 
 	// get specific user
 	fastify.get("/users/:username", async (request, reply) => {
-		return services.getUser(request, reply);
+		userServices.getUser(request, reply);
 	});
 
 	// update specific user
 	fastify.put("/users/:username", postOptions, async (request, reply) => {
-		return services.updateUser(request, reply);
+		userServices.updateUser(request, reply);
 	});
 
 	// delete specific user
 	fastify.delete("/users/:username", postOptions, async (request, reply) => {
-		return services.deleteUser(request, reply);
+		userServices.deleteUser(request, reply);
 	});
 
 	// create authentication token
 	fastify.post("/login", authOptions, async (request, reply) => {
-		return services.login(fastify, request, reply);
+		userServices.login(fastify, request, reply);
 	});
 };
