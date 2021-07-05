@@ -20,10 +20,15 @@
 
 				<v-col cols="12" sm="4" class="text-right">
 					<v-row>
-						<v-col cols="12" sm="6">
+						<v-col cols="12" sm="4">
 							<v-menu offset-y top>
 								<template v-slot:activator="{ on, attrs }">
-									<div v-bind="attrs" v-on="on" class="pt-4 font-weight-medium">Tasks per page: {{ perPage }}</div>
+									<div v-bind="attrs" v-on="on" class="pt-4 font-weight-medium" v-if="isTodo === 'true'">
+										Tasks per page: {{ perPage }}
+									</div>
+									<div v-bind="attrs" v-on="on" class="pt-4 font-weight-medium" v-if="isTodo !== 'true'">
+										Lists per page: {{ perPage }}
+									</div>
 								</template>
 								<v-list>
 									<v-list-item v-for="(item, index) in options" :key="index" @click.stop.prevent="changePerPage(item.perPage)">
@@ -32,8 +37,9 @@
 								</v-list>
 							</v-menu>
 						</v-col>
-
-						<v-col cols="12" sm="6"> </v-col>
+						<v-col cols="12" sm="6" class="pt-5" v-if="isTodo === 'true'">
+							<v-btn @click="deleteCompleted" color="primary"> Delete Completed Tasks </v-btn>
+						</v-col>
 					</v-row>
 				</v-col>
 			</v-row>
@@ -45,12 +51,12 @@
 import { HTTP } from "../axiosInstance";
 
 export default {
-	props: ["isTodo"],
+	props: ["isTodo", "blocked", "initPerPage"],
 
 	data() {
 		return {
 			currentPage: 1,
-			perPage: 10,
+			perPage: 0,
 			hasMorePages: false,
 			options: [{ perPage: 5 }, { perPage: 10 }, { perPage: 15 }, { perPage: 20 }, { perPage: 25 }],
 		};
@@ -59,9 +65,19 @@ export default {
 	methods: {
 		changePerPage(val) {
 			this.perPage = val;
+			if (this.isTodo === "true") {
+				this.$store.dispatch("setTodoPerPage", val);
+			} else {
+				this.$store.dispatch("setListPerPage", val);
+			}
+		},
+
+		deleteCompleted() {
+			this.$emit("deleteCompleted");
 		},
 
 		async nextPage() {
+			if (this.blocked) return;
 			try {
 				if (this.isTodo === "true") {
 					await this.computeTodoPages();
@@ -102,6 +118,7 @@ export default {
 		},
 
 		async prevPage() {
+			if (this.blocked) return;
 			try {
 				if (this.currentPage > 1) {
 					this.currentPage--;
@@ -123,6 +140,16 @@ export default {
 		perPage() {
 			this.emitToParent();
 		},
+		blocked() {
+			if (this.blocked) {
+				this.currentPage = 1;
+			}
+		},
+	},
+
+	mounted() {
+		if (this.isTodo === "true") this.perPage = this.$store.state.todoPerPage;
+		else this.perPage = this.$store.state.listPerPage;
 	},
 };
 </script>

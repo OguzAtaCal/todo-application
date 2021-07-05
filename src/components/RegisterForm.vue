@@ -128,6 +128,7 @@ export default {
 				this.$refs[f].reset();
 			});
 		},
+
 		submit() {
 			this.formHasErrors = false;
 			Object.keys(this.form).forEach((f) => {
@@ -142,6 +143,7 @@ export default {
 				this.register();
 			}
 		},
+
 		async register() {
 			HTTP({
 				method: "POST",
@@ -161,10 +163,11 @@ export default {
 						console.log("username taken");
 				});
 		},
+
 		async exists() {
 			const result = await HTTP({
 				method: "GET",
-				url: "users/" + this.username,
+				url: `users/${this.username}`,
 			});
 			if (result.data === "User couldnt be found") {
 				this.usernameTaken = true;
@@ -174,9 +177,11 @@ export default {
 				return true;
 			}
 		},
+
 		debouncedQuery: _.debounce(function() {
 			this.exists();
 		}, 1000),
+
 		validate: _.debounce(function() {
 			this.$refs.username.validate();
 		}, 1500),

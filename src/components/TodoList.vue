@@ -1,59 +1,8 @@
 <template>
 	<div>
 		<v-list dense rounded>
-			<div v-for="item in items" :key="item.id">
-				<v-list-item v-if="!item.edit && item.active" :to="`/todo-list/${item.id}`">
-					<v-list-item-content>
-						<v-list-item-title v-text="item.name"></v-list-item-title>
-					</v-list-item-content>
-
-					<v-list-item-action>
-						<v-menu left offset-x rounded="b-lg">
-							<template v-slot:activator="{ on, attrs }">
-								<v-btn icon v-bind="attrs" v-on.stop="on" @click.stop.prevent>
-									<v-icon>mdi-dots-vertical</v-icon>
-								</v-btn>
-							</template>
-
-							<v-list class="pt-0 pb-0">
-								<v-list-item @click.stop="showTextField(item.id)">
-									<v-list-item-icon class="mr-3">
-										<v-icon small>mdi-pencil</v-icon>
-									</v-list-item-icon>
-									<v-list-item-content class="mr-3">Rename</v-list-item-content>
-								</v-list-item>
-
-								<v-list-item @click.stop="deleteList(item.id)">
-									<v-list-item-icon class="mr-3">
-										<v-icon small>mdi-delete</v-icon>
-									</v-list-item-icon>
-									<v-list-item-content class="mr-3">Delete</v-list-item-content>
-								</v-list-item>
-							</v-list>
-						</v-menu>
-					</v-list-item-action>
-
-					<v-list-item-action>
-						<v-btn disabled style="width:10px;" small>
-							{{ item.taskCount }}
-						</v-btn>
-					</v-list-item-action>
-				</v-list-item>
-				<v-text-field
-					class="pt-3 pb-3"
-					v-if="item.edit"
-					v-model="editedListName"
-					hide-details
-					label="Rename list"
-					outlined
-					append-icon="mdi-pen"
-					@click:append="editList(item.id)"
-					@keydown.enter.prevent="editList(item.id)"
-				>
-				</v-text-field>
-			</div>
 			<v-text-field
-				v-if="!!items.length"
+				v-if="!!items.length || searching"
 				hide-details
 				label="Search for a list"
 				outlined
@@ -78,7 +27,59 @@
 			></v-text-field>
 		</v-list>
 
-		<Footer v-on:transferInfo="onTransfer" isTodo="false" />
+		<div v-for="item in items" :key="item.id">
+			<v-list-item v-if="!item.edit" :to="`/todo-list/${item.id}`">
+				<v-list-item-content>
+					<v-list-item-title v-text="item.name"></v-list-item-title>
+				</v-list-item-content>
+
+				<v-list-item-action>
+					<v-menu left offset-x rounded="b-lg">
+						<template v-slot:activator="{ on, attrs }">
+							<v-btn icon v-bind="attrs" v-on.stop="on" @click.stop.prevent>
+								<v-icon>mdi-dots-vertical</v-icon>
+							</v-btn>
+						</template>
+
+						<v-list class="pt-0 pb-0">
+							<v-list-item @click.stop="showTextField(item.id)">
+								<v-list-item-icon class="mr-3">
+									<v-icon small>mdi-pencil</v-icon>
+								</v-list-item-icon>
+								<v-list-item-content class="mr-3">Rename</v-list-item-content>
+							</v-list-item>
+
+							<v-list-item @click.stop="deleteList(item.id)">
+								<v-list-item-icon class="mr-3">
+									<v-icon small>mdi-delete</v-icon>
+								</v-list-item-icon>
+								<v-list-item-content class="mr-3">Delete</v-list-item-content>
+							</v-list-item>
+						</v-list>
+					</v-menu>
+				</v-list-item-action>
+
+				<v-list-item-action>
+					<v-btn disabled style="width:10px;" small>
+						{{ item.taskCount }}
+					</v-btn>
+				</v-list-item-action>
+			</v-list-item>
+			<v-text-field
+				class="pa-3"
+				v-if="item.edit"
+				v-model="editedListName"
+				hide-details
+				label="Rename list"
+				outlined
+				append-icon="mdi-pen"
+				@click:append="editList(item.id)"
+				@keydown.enter.prevent="editList(item.id)"
+			>
+			</v-text-field>
+		</div>
+
+		<Footer v-on:transferInfo="onTransfer" isTodo="false" :blocked="searching" />
 	</div>
 </template>
 
@@ -98,16 +99,16 @@ export default {
 		searchName: null,
 		items: [],
 		currentPage: 1,
-		perPage: 10,
+		perPage: 0,
 		hasData: false,
+		searching: false,
 	}),
 
 	watch: {
-		searchName: function() {
-			if (this.searchName === "" || !this.searchName) {
-				for (let counter = 0; counter < this.items.length; counter++) {
-					this.items[counter].active = true;
-				}
+		searchName: async function() {
+			if (!this.searchName) {
+				this.searching = false;
+				await this.initTodoListsArray();
 			}
 		},
 	},
@@ -126,7 +127,7 @@ export default {
 			}
 		},
 
-		async initData() {
+		async initHasData() {
 			const results = await HTTP({
 				method: "GET",
 				url: `todos?limit=${this.perPage}&pageOffset=${this.currentPage}`,
@@ -136,25 +137,30 @@ export default {
 			} else this.hasData = false;
 		},
 
-		async initArray() {
-			this.items = [];
+		async initTodoListsArray() {
+			var items = [];
 			try {
 				const results = await HTTP({
 					method: "GET",
 					url: `todos?limit=${this.perPage}&pageOffset=${this.currentPage}`,
 				});
-				console.log(results.data);
-				await this.initData();
+				await this.initHasData();
 				if (results.data[0]) {
-					console.log(results.data);
 					for (let counter = 0; counter < results.data.length; counter++) {
-						this.items.push({
+						const todos = await HTTP({
+							method: "GET",
+							url: `todos/${results.data[counter].id}/items`,
+						});
+
+						var taskCount = 0;
+						if (todos.data[0]) taskCount = todos.data.length;
+
+						items.push({
 							name: results.data[counter].name,
 							id: results.data[counter].id,
 							userId: results.data[counter].user_id,
-							taskCount: 0,
+							taskCount: taskCount,
 							edit: false,
-							active: true,
 						});
 					}
 				} else console.log(results);
@@ -162,22 +168,23 @@ export default {
 				console.log("error fetching todo lists");
 				console.log(error.response);
 			}
+			this.items = items;
 		},
 
 		async onTransfer(currentPage, perPage) {
 			this.currentPage = currentPage;
 			this.perPage = perPage;
-			await this.initArray();
+			await this.initTodoListsArray();
 		},
 
 		async deleteList(id) {
 			try {
 				await HTTP({
 					method: "DELETE",
-					url: "todos/" + id,
+					url: `todos/${id}`,
 				});
 				console.log("deleted ", id);
-				this.items = this.items.filter((item) => item.id !== id);
+				if (!this.searching) this.initTodoListsArray();
 			} catch (error) {
 				console.log(error);
 			}
@@ -204,7 +211,6 @@ export default {
 							userId: todoLists.data[todoLists.data.length - 1].user_id,
 							taskCount: 0,
 							edit: false,
-							active: true,
 						});
 					}
 				}
@@ -218,12 +224,11 @@ export default {
 				this.editing = false;
 				const result = await HTTP({
 					method: "PUT",
-					url: "todos/" + id,
+					url: `todos/${id}`,
 					data: {
 						name: this.editedListName,
 					},
 				});
-				console.log("edit ", this.editedListName);
 				console.log(result);
 				this.items = this.items.filter((item) => {
 					if (item.id === id) {
@@ -237,18 +242,43 @@ export default {
 			}
 		},
 
-		searchList() {
-			for (let counter = 0; counter < this.items.length; counter++) {
-				if (this.searchName === "") this.items[counter].active = true;
-				else {
-					if (!this.items[counter].name.includes(this.searchName)) this.items[counter].active = false;
+		async searchList() {
+			try {
+				if (!this.searchName) return;
+				const todoLists = await HTTP({
+					method: "GET",
+					url: `todos?name=${this.searchName}`,
+				});
+				if (todoLists.data) {
+					this.searching = true;
+					var newItems = [];
+					for (var i = 0; i < todoLists.data.length; i++) {
+						const todos = await HTTP({
+							method: "GET",
+							url: `todos/${todoLists.data[i].id}/items`,
+						});
+
+						var taskCount = 0;
+						if (todos.data[0]) taskCount = todos.data.length;
+						newItems.push({
+							name: todoLists.data[i].name,
+							id: todoLists.data[i].id,
+							userId: todoLists.data[i].user_id,
+							taskCount: taskCount,
+							edit: false,
+						});
+					}
+					this.items = newItems;
 				}
+			} catch (error) {
+				console.log(error.response);
 			}
 		},
 	},
 
-	async created() {
-		await this.initArray();
+	async mounted() {
+		this.perPage = this.$store.state.listPerPage;
+		await this.initTodoListsArray();
 	},
 };
 </script>

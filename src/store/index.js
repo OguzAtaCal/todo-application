@@ -11,10 +11,18 @@ const vuexLocal = new VuexPersistence({
 export default new Vuex.Store({
 	state: {
 		jwt: "",
+		todoPerPage: 10,
+		listPerPage: 10,
 	},
 	mutations: {
 		storeToken(state, jwt) {
 			state.jwt = jwt;
+		},
+		setTodoPerPage(state, todoPerPage) {
+			state.todoPerPage = todoPerPage;
+		},
+		setListPerPage(state, listPerPage) {
+			state.listPerPage = listPerPage;
 		},
 		resetToken(state) {
 			state.jwt = "";
@@ -26,6 +34,12 @@ export default new Vuex.Store({
 		},
 		resetToken(context) {
 			context.commit("resetToken");
+		},
+		setTodoPerPage(context, todoPerPage) {
+			context.commit("setTodoPerPage", todoPerPage);
+		},
+		setListPerPage(context, listPerPage) {
+			context.commit("setListPerPage", listPerPage);
 		},
 	},
 	plugins: [vuexLocal.plugin],

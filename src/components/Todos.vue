@@ -27,13 +27,13 @@
 		></v-text-field>
 
 		<div v-for="item in items" :key="item.id">
-			<v-list-item v-if="!item.edit && item.active" @click="doTask(item.id)" :class="{ 'blue lighten-5': item.completed }">
+			<v-list-item v-if="!item.edit" @click="doTask(item.id)" :class="{ 'blue lighten-5': item.completed }">
 				<template v-slot:default>
 					<v-list-item-action>
 						<v-checkbox :input-value="item.completed"></v-checkbox>
 					</v-list-item-action>
 					<v-list-item-content>
-						<v-list-item-title v-text="item.name"></v-list-item-title>
+						<v-list-item-title :class="{ 'text-decoration-line-through': item.completed }">{{ item.name }}</v-list-item-title>
 					</v-list-item-content>
 
 					<v-list-item-action>
@@ -78,7 +78,7 @@
 			</v-text-field>
 		</div>
 
-		<Footer v-on:transferInfo="onTransfer" isTodo="true" />
+		<Footer v-on:transferInfo="onTransfer" v-on:deleteCompleted="deleteCompleted" isTodo="true" :blocked="searching" />
 	</v-list>
 </template>
 
@@ -99,11 +99,33 @@ export default {
 		newTaskName: null,
 		listName: "test",
 		currentPage: 1,
-		perPage: 10,
+		perPage: 0,
 		hasData: false,
+		searching: false,
 	}),
 
 	methods: {
+		async deleteCompleted() {
+			const results = await HTTP({
+				method: "GET",
+				url: `todos/${this.$route.params.id}/items`,
+			});
+
+			if (results.data[0]) {
+				var deleted = false;
+				for (var i = 0; i < results.data.length; i++) {
+					if (results.data[i].is_completed) {
+						await HTTP({
+							method: "DELETE",
+							url: `todos/${this.$route.params.id}/items/${results.data[i].id}`,
+						});
+						deleted = true;
+					}
+				}
+				if (deleted) await this.initTodosArray();
+			}
+		},
+
 		showTextField(id) {
 			if (!this.editing) {
 				this.items = this.items.filter((item) => {
@@ -117,35 +139,35 @@ export default {
 			}
 		},
 
-		async initData() {
+		async initHasData() {
 			const results = await HTTP({
 				method: "GET",
-				url: "todos/" + this.$route.params.id + `/items`,
+				url: `todos/${this.$route.params.id}/items`,
 			});
 			if (results.data[0]) {
 				this.hasData = true;
 			} else this.hasData = false;
 		},
 
-		async initArray() {
+		async initTodosArray() {
 			try {
 				this.items = [];
 				const todoList = await HTTP({
 					method: "GET",
-					url: "todos/" + this.$route.params.id,
+					url: `todos/${this.$route.params.id}`,
 				});
 				if (todoList && todoList.data[0]) {
 					this.listName = todoList.data[0].name;
 					this.emitToParent();
 				}
 
-				await this.initData();
+				await this.initHasData();
 
 				const results = await HTTP({
 					method: "GET",
-					url: "todos/" + this.$route.params.id + `/items?limit=${this.perPage}&pageOffset=${this.currentPage}`,
+					url: `todos/${this.$route.params.id}/items?limit=${this.perPage}&pageOffset=${this.currentPage}`,
 				});
-				console.log(results.data);
+
 				if (results.data[0]) {
 					for (let counter = 0; counter < results.data.length; counter++) {
 						this.items.push({
@@ -154,7 +176,6 @@ export default {
 							listId: results.data[counter].list_id,
 							completed: results.data[counter].is_completed,
 							edit: false,
-							active: true,
 						});
 					}
 				} else this.items = [];
@@ -167,7 +188,7 @@ export default {
 		async onTransfer(currentPage, perPage) {
 			this.currentPage = currentPage;
 			this.perPage = perPage;
-			await this.initArray();
+			await this.initTodosArray();
 		},
 
 		async doTask(id) {
@@ -176,7 +197,7 @@ export default {
 				task[0].completed = !task[0].completed;
 				await HTTP({
 					method: "PUT",
-					url: "todos/" + this.$route.params.id + "/items/" + id,
+					url: `todos/${this.$route.params.id}/items/${id}`,
 					data: {
 						name: task[0].name,
 						is_completed: task[0].completed,
@@ -191,11 +212,10 @@ export default {
 			try {
 				await HTTP({
 					method: "DELETE",
-					url: "todos/" + this.$route.params.id + "/items/" + id,
+					url: `todos/${this.$route.params.id}/items/${id}`,
 				});
 				console.log("deleted ", id);
-				this.items = this.items.filter((item) => item.id !== id);
-				this.initData();
+				if (!this.searching) this.initTodosArray();
 			} catch (error) {
 				console.log(error);
 			}
@@ -206,7 +226,7 @@ export default {
 				if (this.newTaskName) {
 					const result = await HTTP({
 						method: "POST",
-						url: "todos/" + this.$route.params.id + "/items",
+						url: `todos/${this.$route.params.id}/items`,
 						data: {
 							name: this.newTaskName,
 						},
@@ -215,7 +235,7 @@ export default {
 
 					const todos = await HTTP({
 						method: "GET",
-						url: "todos/" + this.$route.params.id + "/items",
+						url: `todos/${this.$route.params.id}/items`,
 					});
 					if (todos.data[todos.data.length - 1]) {
 						this.items.push({
@@ -224,7 +244,6 @@ export default {
 							userId: todos.data[todos.data.length - 1].user_id,
 							completed: todos.data[todos.data.length - 1].is_completed,
 							edit: false,
-							active: true,
 						});
 					}
 				}
@@ -240,7 +259,7 @@ export default {
 				let task = this.items.filter((task) => task.id === id);
 				await HTTP({
 					method: "PUT",
-					url: "todos/" + this.$route.params.id + "/items/" + id,
+					url: `todos/${this.$route.params.id}/items/${id}`,
 					data: {
 						name: this.editedTaskName,
 						is_completed: task[0].is_completed,
@@ -263,26 +282,38 @@ export default {
 			this.$emit("childToParent", this.listName);
 		},
 
-		searchList() {
-			for (let counter = 0; counter < this.items.length; counter++) {
-				if (this.searchName === "") this.items[counter].active = true;
-				else {
-					if (!this.items[counter].name.includes(this.searchName)) this.items[counter].active = false;
+		async searchList() {
+			try {
+				if (!this.searchName) return;
+				const todos = await HTTP({
+					method: "GET",
+					url: `todos/${this.$route.params.id}/items?name=${this.searchName}`,
+				});
+				if (todos.data) {
+					this.searching = true;
+					var newItems = [];
+					for (var i = 0; i < todos.data.length; i++) {
+						newItems.push({
+							name: todos.data[i].name,
+							id: todos.data[i].id,
+							userId: todos.data[i].user_id,
+							completed: todos.data[i].is_completed,
+							edit: false,
+						});
+					}
+					this.items = newItems;
 				}
+			} catch (error) {
+				console.log(error);
 			}
 		},
 	},
 
-	async mounted() {
-		await this.initArray();
-	},
-
 	watch: {
-		searchName: function() {
-			if (this.searchName === "" || !this.searchName) {
-				for (let counter = 0; counter < this.items.length; counter++) {
-					this.items[counter].active = true;
-				}
+		searchName: async function() {
+			if (!this.searchName) {
+				this.searching = false;
+				await this.initTodosArray();
 			}
 		},
 	},
