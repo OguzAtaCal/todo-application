@@ -39,12 +39,19 @@ class TodoListServices {
 	async getTodoLists(request, reply, id) {
 		try {
 			const { limit, pageOffset } = request.query;
+			const { name } = request.query;
 			if (limit && pageOffset) {
 				const results = await db("todo_lists")
 					.where("user_id", id)
 					.orderBy("created_at", "asc")
 					.paginate({ perPage: limit, currentPage: pageOffset });
 				reply.send(results.data);
+			} else if (name) {
+				const todoLists = await db("todo_lists")
+					.where("user_id", id)
+					.where("name", "like", `%${name}%`)
+					.orderBy("created_at", "asc");
+				reply.send(todoLists);
 			} else {
 				const results = await db("todo_lists").where("user_id", id).orderBy("created_at", "asc");
 				reply.send(results);

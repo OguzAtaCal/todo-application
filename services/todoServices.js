@@ -38,12 +38,21 @@ class TodoServices {
 			const todoList = await db("todo_lists").where("id", request.params.listId);
 			if (todoList[0] && todoList[0].user_id === id) {
 				const { limit, pageOffset } = request.query;
+				const { name } = request.query;
+
 				if (limit && pageOffset) {
 					const results = await db("todos")
 						.where("list_id", request.params.listId)
 						.orderBy("created_at", "asc")
 						.paginate({ perPage: limit, currentPage: pageOffset });
 					reply.send(results.data);
+				} else if (name) {
+					console.log(name);
+					const results = await db("todos")
+						.where("list_id", request.params.listId)
+						.where("name", "like", `%${name}%`)
+						.orderBy("created_at", "asc");
+					reply.send(results);
 				} else {
 					const results = await db("todos").where("list_id", request.params.listId).orderBy("created_at", "asc");
 					reply.send(results);
