@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  db:
+    image: "postgres"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: "12345"
+      POSTGRES_USER: "docker"
+
+  server:
+    #command: ["/wait-for-it.sh", "db:5432", "--", "docker-entrypoint.sh"]
+    build: backend
+    container_name: backend_container
+    depends_on:
+      - db
+    ports:
+      - "3030:3030"
+
+  client:
+    build: frontend
+    container_name: frontend_container
+    depends_on:
+      - db
+    ports:
+      - 8080:8080

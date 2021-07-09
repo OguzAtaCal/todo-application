@@ -60,7 +60,7 @@
 				</v-list-item-action>
 
 				<v-list-item-action>
-					<v-btn disabled style="width:10px;" small>
+					<v-btn disabled style="width: 10px" small>
 						{{ item.taskCount }}
 					</v-btn>
 				</v-list-item-action>
@@ -105,7 +105,7 @@ export default {
 	}),
 
 	watch: {
-		searchName: async function() {
+		searchName: async function () {
 			if (!this.searchName) {
 				this.searching = false;
 				await this.initTodoListsArray();
@@ -163,7 +163,7 @@ export default {
 							edit: false,
 						});
 					}
-				} else console.log(results);
+				}
 			} catch (error) {
 				console.log("error fetching todo lists");
 				console.log(error.response);
@@ -222,14 +222,13 @@ export default {
 		async editList(id) {
 			try {
 				this.editing = false;
-				const result = await HTTP({
+				await HTTP({
 					method: "PUT",
 					url: `todos/${id}`,
 					data: {
 						name: this.editedListName,
 					},
 				});
-				console.log(result);
 				this.items = this.items.filter((item) => {
 					if (item.id === id) {
 						item.edit = false;

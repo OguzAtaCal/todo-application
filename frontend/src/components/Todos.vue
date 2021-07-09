@@ -224,14 +224,13 @@ export default {
 		async addTask() {
 			try {
 				if (this.newTaskName) {
-					const result = await HTTP({
+					await HTTP({
 						method: "POST",
 						url: `todos/${this.$route.params.id}/items`,
 						data: {
 							name: this.newTaskName,
 						},
 					});
-					console.log(result);
 
 					const todos = await HTTP({
 						method: "GET",
@@ -310,7 +309,7 @@ export default {
 	},
 
 	watch: {
-		searchName: async function() {
+		searchName: async function () {
 			if (!this.searchName) {
 				this.searching = false;
 				await this.initTodosArray();
