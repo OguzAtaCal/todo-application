@@ -7,6 +7,7 @@ const todoListRoute = require("./routes/todoListController.js");
 const todoRoute = require("./routes/todoController");
 
 app.get("/", (request, reply) => {
+	console.log("get requst");
 	reply.send("Hello World");
 });
 
@@ -29,4 +30,4 @@ app.register(require("fastify-cors"), {
 });
 
 // starting the app
-app.listen(3030, () => console.log("Server set up at port 3030"));
+app.listen(3030, "0.0.0.0", () => console.log("Server set up at port 3030"));

@@ -153,7 +153,6 @@ export default {
 				.then((res) => {
 					if (res.data && res.data === "error_duplicate_username") console.log("Duplicate user error");
 					else {
-						console.log(res.data);
 						this.$router.push("/login");
 					}
 				})

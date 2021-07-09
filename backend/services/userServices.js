@@ -35,10 +35,14 @@ class UserServices {
 
 	async getUsers(request, reply) {
 		try {
-			const knexQuery = db("users");
+			const knexQuery = await db("users");
 			const { limit, pageOffset } = request.query;
-			if (limit && pageOffset) knexQuery.paginate({ perPage: limit, currentPage: pageOffset });
-			reply.send(knexQuery);
+			if (limit && pageOffset) {
+				knexQuery.paginate({ perPage: limit, currentPage: pageOffset });
+				reply.send(knexQuery);
+			} else {
+				reply.send(knexQuery);
+			}
 		} catch (err) {
 			console.log("an error has been caught getting all users");
 			reply.send(err);

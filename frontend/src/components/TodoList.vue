@@ -60,7 +60,7 @@
 				</v-list-item-action>
 
 				<v-list-item-action>
-					<v-btn disabled style="width: 10px" small>
+					<v-btn disabled style="width:10px;" small>
 						{{ item.taskCount }}
 					</v-btn>
 				</v-list-item-action>
@@ -105,7 +105,7 @@ export default {
 	}),
 
 	watch: {
-		searchName: async function () {
+		searchName: async function() {
 			if (!this.searchName) {
 				this.searching = false;
 				await this.initTodoListsArray();

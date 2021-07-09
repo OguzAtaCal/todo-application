@@ -309,7 +309,7 @@ export default {
 	},
 
 	watch: {
-		searchName: async function () {
+		searchName: async function() {
 			if (!this.searchName) {
 				this.searching = false;
 				await this.initTodosArray();

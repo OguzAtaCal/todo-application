@@ -10,7 +10,6 @@ services:
       POSTGRES_USER: "docker"
 
   server:
-    #command: ["/wait-for-it.sh", "db:5432", "--", "docker-entrypoint.sh"]
     build: backend
     container_name: backend_container
     depends_on:
